@@ -35,10 +35,11 @@ lotd: 2 --> luck of the dwarves not used
 
 """
 
-
+# arrays containing list of brothers (for random choice function below)
 regular_brothers = ["ahrim", "akrisae", "dharok", "guthan", "karil", "torag", "verac"]
 all_brothers = regular_brothers + ["linza"]
 
+# number of pieces in each set
 set_size = {
 	"ahrim": 6,
 	"akrisae": 4,
@@ -50,25 +51,41 @@ set_size = {
 	"linza": 5
 }
 
+# force stop if any single iteration exceeds this kills, in case of bugs
 maxkills = 100000
 
 def roll(chance):
+	# roll a drop and returns TRUE if succesful, FALSE otherwise
+	# the function randint(a,b) returns an integer between a and b INCLUSIVE
+	# so we have to do randint(0,x-1) to roll x equal slots
+	# we test whether the roll is equal to an arbitrary fixed slot;
+	# below, we have simply chosen the zero slot
+
 	return random.randint(0,chance-1) is 0
 
 def run_simulations(iterations, theory, lotd, strategy):
+
+	# save the kills required to obtain title in each iteration in an array
 	kc_to_title = []
 
+	# iterate simulation
 	for i in range(iterations):
 		r = Iteration()
 		e = r.roll_until_title(theory, lotd, strategy)
 		kc_to_title += [e]
 
+	# return the average value of the array
 	print(float(sum(kc_to_title))/max(len(kc_to_title),1))
 
 
 class Iteration:
+
+	# class to organize the logic of a single iteration
+
 	def __init__(self):
 		self.kills = 0
+
+		# this two-dimensional array tracks the number of pieces of each item obtained
 		self.drops = {}
 
 		for brother in all_brothers:
@@ -76,13 +93,17 @@ class Iteration:
 
 
 	def check_non_linza_set(self):
+		# check whether all non-linza pieces have been obtained
 		return all(all(piece > 0 for piece in self.drops[brother]) for brother in regular_brothers)
 
 	def check_full_set(self):
+		# check whether all pieces including linza pieces have been obtained
 		return all(all(piece > 0 for piece in self.drops[brother]) for brother in all_brothers)
 
 	def roll_all_brothers(self, theory, lotd):
 		
+		# kill every brother and loot the chest
+
 		self.kills += 1
 
 		if theory is "A":
@@ -113,6 +134,8 @@ class Iteration:
 					  self.drops[uniquebrother][random.randint(0,set_size[uniquebrother])-1] += 1
 
 	def roll_linza_only(self, theory, lotd):
+
+		# kill linza only and loot the chest
 
 		self.kills += 1
 
@@ -145,6 +168,8 @@ class Iteration:
 					self.drops[uniquebrother][random.randint(0,set_size[uniquebrother])-1] += 1
 
 	def roll_until_title(self, theory, lotd, strategy):
+
+		# keep rolling until the title is obtained or the maxkill failsafe is passed
 
 		if strategy is "allbrothers":
 			while (not self.check_full_set()) and self.kills <= maxkills:
