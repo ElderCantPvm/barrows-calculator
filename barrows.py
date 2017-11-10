@@ -139,33 +139,14 @@ class Iteration:
 
 		self.kills += 1
 
-		# theories A and B almost coincide if you only kill linza
-		# the only difference is that you only roll regular pieces if you fail linza with theory B
-		# this actually doesn't change the expected kills to title with either of the considered strategies
+		# theories A and B coincide if you only kill linza
 
-		if theory is "A":
-			# roll linza
-			if roll(512-lotd):
-				# roll which piece and increment
-				self.drops["linza"][random.randint(0,set_size["linza"]-1)] += 1
-	
-			# roll other brothers, 1 time
-			# roll whether unique
-			if roll(450-lotd):
-				# roll which brother, which piece, and increment
-				uniquebrother = random.choice(regular_brothers)
-				self.drops[uniquebrother][random.randint(0,set_size[uniquebrother])-1] += 1
+		# roll linza
+		if roll(512-lotd):
+			# roll which piece and increment
+			self.drops["linza"][random.randint(0,set_size["linza"]-1)] += 1
 
-		if theory is "B":
-			# roll linza
-			if roll(512-lotd):
-				# roll which piece and increment
-				self.drops["linza"][random.randint(0,set_size["linza"]-1)] += 1
-			else:
-				if roll(450-lotd):
-					# roll which brother, which piece, and increment
-					uniquebrother = random.choice(regular_brothers)
-					self.drops[uniquebrother][random.randint(0,set_size[uniquebrother])-1] += 1
+
 
 	def roll_until_title(self, theory, lotd, strategy):
 
@@ -184,7 +165,3 @@ class Iteration:
 				self.roll_linza_only(theory, lotd)
 
 			return self.kills
-
-
-
-
